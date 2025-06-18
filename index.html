@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生日快乐！</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            font-family: 'Caveat', cursive;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+            height: 100vh;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 10;
+            padding-top: 20vh;
+        }
+        
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            font-weight: 700;
+        }
+        
+        .letter {
+            display: inline-block;
+        }
+        
+        p {
+            font-size: 2rem;
+            color: #FFB6C1; /* 淡粉色 */
+            margin-top: 0;
+            font-weight: 400;
+        }
+        
+        /* 生日元素样式 */
+        .birthday-element {
+            position: absolute;
+            z-index: 5;
+            opacity: 0.8;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        
+        /* 烟花画布 */
+        #fireworks {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- 烟花画布 -->
+    <canvas id="fireworks"></canvas>
+    
+    <!-- 生日元素 -->
+    <img src="https://cdn.pixabay.com/photo/2017/01/31/23/42/decorative-2028039_960_720.png" class="birthday-element" style="width: 100px; top: 10%; left: 10%; animation-delay: 0s;">
+    <img src="https://cdn.pixabay.com/photo/2012/04/18/00/54/cake-36166_960_720.png" class="birthday-element" style="width: 120px; top: 80%; left: 15%; animation-delay: 1s;">
+    <img src="https://cdn.pixabay.com/photo/2014/04/03/00/41/candles-309539_960_720.png" class="birthday-element" style="width: 80px; top: 20%; left: 80%; animation-delay: 2s;">
+    <img src="https://cdn.pixabay.com/photo/2014/04/03/00/41/birthday-309546_960_720.png" class="birthday-element" style="width: 100px; top: 70%; left: 75%; animation-delay: 0.5s;">
+    <img src="https://cdn.pixabay.com/photo/2014/04/03/00/41/gift-309539_960_720.png" class="birthday-element" style="width: 90px; top: 30%; left: 20%; animation-delay: 1.5s;">
+    <img src="https://cdn.pixabay.com/photo/2014/04/03/00/41/party-309540_960_720.png" class="birthday-element" style="width: 110px; top: 60%; left: 85%; animation-delay: 2.5s;">
+    
+    <!-- 主要内容 -->
+    <div class="container">
+        <h1 id="birthday-text">小鲸鱼，HAPPY BIRTHDAY!</h1>
+        <p>他们祝你挺拔，再挺拔一点。</p>
+        <p>我只祝你永远自由，永远一骑当千</p>
+    </div>
+    
+    <script>
+        // 设置每个字母不同颜色
+        const birthdayText = document.getElementById('birthday-text');
+        const text = birthdayText.textContent;
+        birthdayText.innerHTML = '';
+        
+        const colors = [
+            '#FF0000', // 红
+            '#FF7F00', // 橙
+            '#FFFF00', // 黄
+            '#00FF00', // 绿
+            '#0000FF', // 蓝
+            '#4B0082', // 靛
+            '#9400D3', // 紫
+            '#FF1493', // 深粉
+            '#00FFFF', // 青
+            '#FF00FF', // 洋红
+            '#FFD700', // 金
+            '#32CD32', // 酸橙绿
+            '#FF4500'  // 橙红
+        ];
+        
+        for (let i = 0; i < text.length; i++) {
+            const span = document.createElement('span');
+            span.className = 'letter';
+            span.textContent = text[i];
+            span.style.color = colors[i % colors.length];
+            birthdayText.appendChild(span);
+            
+            // 为空格添加间距
+            if (text[i] === ' ') {
+                span.style.padding = '0 5px';
+            }
+        }
+        
+        // 烟花效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('fireworks');
+            const ctx = canvas.getContext('2d');
+            
+            // 设置画布大小为窗口大小
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // 烟花数组
+            let fireworks = [];
+            
+            // 烟花粒子类
+            class Particle {
+                constructor(x, y, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.color = color;
+                    this.velocity = {
+                        x: (Math.random() - 0.5) * 8,
+                        y: (Math.random() - 0.5) * 8
+                    };
+                    this.alpha = 1;
+                    this.decay = Math.random() * 0.015 + 0.01;
+                    this.size = Math.random() * 3 + 1;
+                }
+                
+                update() {
+                    this.velocity.y += 0.05; // 重力
+                    this.x += this.velocity.x;
+                    this.y += this.velocity.y;
+                    this.alpha -= this.decay;
+                }
+                
+                draw() {
+                    ctx.globalAlpha = this.alpha;
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
+            
+            // 烟花类
+            class Firework {
+                constructor() {
+                    this.reset();
+                }
+                
+                reset() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = canvas.height;
+                    this.targetY = Math.random() * canvas.height / 2;
+                    this.speed = Math.random() * 2 + 2;
+                    this.particles = [];
+                    this.exploded = false;
+                    this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                }
+                
+                explode() {
+                    for (let i = 0; i < 100; i++) {
+                        this.particles.push(new Particle(this.x, this.y, this.color));
+                    }
+                    this.exploded = true;
+                }
+                
+                update() {
+                    if (!this.exploded) {
+                        this.y -= this.speed;
+                        
+                        if (this.y <= this.targetY) {
+                            this.explode();
+                        }
+                        
+                        // 绘制上升的烟花
+                        ctx.fillStyle = this.color;
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                        ctx.closePath();
+                        ctx.fill();
+                    } else {
+                        // 更新和绘制粒子
+                        for (let i = 0; i < this.particles.length; i++) {
+                            this.particles[i].update();
+                            this.particles[i].draw();
+                            
+                            // 移除透明度为0的粒子
+                            if (this.particles[i].alpha <= 0) {
+                                this.particles.splice(i, 1);
+                                i--;
+                            }
+                        }
+                        
+                        // 所有粒子都消失后重置烟花
+                        if (this.particles.length === 0) {
+                            this.reset();
+                        }
+                    }
+                }
+            }
+            
+            // 创建多个烟花
+            for (let i = 0; i < 5; i++) {
+                fireworks.push(new Firework());
+            }
+            
+            // 动画循环
+            function animate() {
+                requestAnimationFrame(animate);
+                ctx.globalAlpha = 0.2;
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                fireworks.forEach(firework => {
+                    firework.update();
+                });
+                
+                // 随机添加新烟花
+                if (Math.random() < 0.03) {
+                    fireworks.push(new Firework());
+                }
+            }
+            
+            animate();
+            
+            // 窗口大小调整时重置画布
+            window.addEventListener('resize', function() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+            
+            // 点击时添加烟花
+            canvas.addEventListener('click', function(e) {
+                const firework = new Firework();
+                firework.x = e.clientX;
+                firework.y = e.clientY;
+                firework.explode();
+                fireworks.push(firework);
+            });
+        });
+    </script>
+</body>
+</html>
